@@ -6,7 +6,9 @@ plugins {
 android {
     namespace 'org.saintgits.edutrack'
     compileSdk 33
-
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.4.0"
+    }
     defaultConfig {
         applicationId "org.saintgits.edutrack"
         minSdk 24
@@ -35,9 +37,6 @@ android {
     }
     buildFeatures {
         compose true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion '1.2.0'
     }
     packagingOptions {
         resources {

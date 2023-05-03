@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHost
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
@@ -114,7 +115,7 @@ fun DashboardScreen(username: String, role: Role) {
         }
     ) {
        Column(modifier = Modifier.padding(it)) {
-           navController.createGraph(startDestination = Screen.Home.route) {
+           NavHost(navController = navController, startDestination = Screen.Home.route) {
                composable(Screen.Home.route) {
                    HomeScreen(user = User(
                        username,
