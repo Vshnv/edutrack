@@ -69,12 +69,7 @@ fun NavDrawerPreview() {
 @Composable
 fun HomePreview() {
     val role = Role.STUDENT
-    HomeScreen(User(
-        username = "mals",
-        name = "Malavika",
-        birthDate = Date(),
-        role = Role.STUDENT
-    ))
+    
 }
 
 
@@ -129,6 +124,7 @@ fun DashboardScreen(username: String, role: Role) {
                }
            }
        }
+        // 1 2 3 4
     }
 }
 

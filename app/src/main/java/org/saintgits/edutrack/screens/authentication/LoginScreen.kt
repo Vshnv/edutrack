@@ -1,7 +1,6 @@
 package org.saintgits.edutrack.screens.authentication
 
 import android.content.Intent
-import android.widget.Button
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -17,7 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +24,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.saintgits.edutrack.model.LoginResult
 import org.saintgits.edutrack.screens.dashboard.DashboardActivity
-import org.saintgits.edutrack.viewmodel.LoginViewModel
 
 /*@Composable
 fun LoginScreen(loginViewModel: LoginViewModel) {
@@ -35,7 +32,7 @@ fun LoginScreen(loginViewModel: LoginViewModel) {
 
 
 @Composable
-fun LoginScreen(login: suspend (username: String, password: String) -> LoginResult) {
+fun LoginScreen(login: suspend (username: String, password: String) -> Boolean) {
     val (isLoggingIn, setLoggingIn) = remember { mutableStateOf(false) }
     val (username, setUsername) = rememberSaveable { mutableStateOf("") }
     val (password, setPassword) = rememberSaveable { mutableStateOf("") }

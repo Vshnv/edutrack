@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1027675625416",
+    "project_id": "edutrack-3b03a",
+    "storage_bucket": "edutrack-3b03a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1027675625416:android:4a2df5f59851436e05d2fd",
+        "android_client_info": {
+          "package_name": "com.saintgits.edutrack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWOvsHNt3-9r37yfO_h1LjP1Zkui34eUg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1027675625416:android:681560c0e880b31a05d2fd",
+        "android_client_info": {
+          "package_name": "org.saintgits.edutrack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWOvsHNt3-9r37yfO_h1LjP1Zkui34eUg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
