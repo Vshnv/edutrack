@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import org.saintgits.edutrack.model.Role
 import org.saintgits.edutrack.model.User
 import org.saintgits.edutrack.screens.dashboard.screens.HomeScreen
+import org.saintgits.edutrack.screens.dashboard.screens.StudentAssignmentsScreen
 import org.saintgits.edutrack.screens.dashboard.screens.StudentTimeTableScreen
 import org.saintgits.edutrack.ui.theme.EdutrackTheme
 import org.saintgits.edutrack.viewmodel.HomeViewModel
@@ -127,7 +128,7 @@ fun DashboardScreen() {
                 }
                 is LoadableState.Result -> {
                     NavDrawer(name = userLoadableState.result.name, screens = screens, navigate = {
-                        if (it !in listOf(Screen.Home.route, Screen.TimeTableStudent.route)) {
+                        if (it !in listOf(Screen.Home.route, Screen.TimeTableStudent.route, Screen.AssignmentsStudent.route)) {
                             return@NavDrawer
                         }
                         coroutineScope.launch {
@@ -174,6 +175,24 @@ fun DashboardScreen() {
                        }
                        is LoadableState.Result -> {
                            StudentTimeTableScreen(user = userLoadableState.result)
+                       }
+                   }
+               }
+               composable(Screen.AssignmentsStudent.route) {
+                   when (val userLoadableState = userState.value) {
+                       is LoadableState.Error -> {
+                           Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                               Text(text = "Failed to load.")
+                               Text(text = userLoadableState.message)
+                           }
+                       }
+                       is LoadableState.Loading -> {
+                           Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                               CircularProgressIndicator()
+                           }
+                       }
+                       is LoadableState.Result -> {
+                           StudentAssignmentsScreen(user = userLoadableState.result)
                        }
                    }
                }

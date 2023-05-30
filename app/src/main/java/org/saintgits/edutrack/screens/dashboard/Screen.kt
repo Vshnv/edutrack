@@ -11,7 +11,7 @@ enum class Screen(val title: String, val icon: ImageVector, val route: String, v
     TimeTableFaculty("Time Table", Icons.Filled.TableChart, "/faculty/time-table", listOf(Role.FACULTY)),
     AssignmentsStudent("Assignments", Icons.Filled.Book, "/students/assignments", listOf(Role.STUDENT)),
     AssignmentsFaculty("Assignments", Icons.Filled.Book, "/faculty/assignments", listOf(Role.FACULTY)),
-    Performance("Performance", Icons.Filled.Scoreboard, "/students/performance", listOf(Role.STUDENT)),
-    PostGrade("Post Grades", Icons.Filled.Scoreboard, "/faculty/post-grades", listOf(Role.FACULTY)),
+    //Performance("Performance", Icons.Filled.Scoreboard, "/students/performance", listOf(Role.STUDENT)),
+    //PostGrade("Post Grades", Icons.Filled.Scoreboard, "/faculty/post-grades", listOf(Role.FACULTY)),
     CreateUser("Create User", Icons.Filled.Create, "/admin/create-user", listOf(Role.ADMIN)),
 }
