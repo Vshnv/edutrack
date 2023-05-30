@@ -7,6 +7,10 @@ import kotlin.coroutines.suspendCoroutine
 
 class AuthViewModel: ViewModel() {
     suspend fun login(email: String, password: String): Boolean = suspendCoroutine {continuation ->
+        if (email.isBlank() || password.isBlank()) {
+            continuation.resume(false)
+            return@suspendCoroutine
+        }
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
             continuation.resume(task.isSuccessful)
         }

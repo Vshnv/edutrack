@@ -30,6 +30,7 @@ import androidx.navigation.createGraph
 import kotlinx.coroutines.launch
 import org.saintgits.edutrack.model.Role
 import org.saintgits.edutrack.model.User
+import org.saintgits.edutrack.screens.dashboard.screens.CreateUserScreen
 import org.saintgits.edutrack.screens.dashboard.screens.HomeScreen
 import org.saintgits.edutrack.screens.dashboard.screens.StudentAssignmentsScreen
 import org.saintgits.edutrack.screens.dashboard.screens.StudentTimeTableScreen
@@ -128,7 +129,7 @@ fun DashboardScreen() {
                 }
                 is LoadableState.Result -> {
                     NavDrawer(name = userLoadableState.result.name, screens = screens, navigate = {
-                        if (it !in listOf(Screen.Home.route, Screen.TimeTableStudent.route, Screen.AssignmentsStudent.route)) {
+                        if (it !in listOf(Screen.Home.route, Screen.TimeTableStudent.route, Screen.AssignmentsStudent.route, Screen.CreateUser.route)) {
                             return@NavDrawer
                         }
                         coroutineScope.launch {
@@ -195,6 +196,9 @@ fun DashboardScreen() {
                            StudentAssignmentsScreen(user = userLoadableState.result)
                        }
                    }
+               }
+               composable(Screen.CreateUser.route) {
+                   CreateUserScreen()
                }
            }
        }

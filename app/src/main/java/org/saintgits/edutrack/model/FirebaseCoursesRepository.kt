@@ -10,13 +10,10 @@ class FirebaseCoursesRepository(private val firestore: FirebaseFirestore): Cours
             continuation.resume(ApiResult.Success(emptyMap()))
             return@suspendCoroutine
         }
-        firestore.collection("courses").whereIn("code", courseIds).addSnapshotListener { value, error ->
-            if (error != null) {
-                continuation.resume(ApiResult.Error(error))
-                return@addSnapshotListener
-            }
+        firestore.collection("courses").whereIn("code", courseIds).get().addOnCompleteListener { value ->
+
             continuation.resume(ApiResult.Success(
-                value?.documents?.map {
+                value.result?.documents?.map {
                     val code = it.getString("code") ?: ""
                     val name = it.getString("name") ?: ""
                     val professor = it.getString("professor") ?: ""
@@ -25,6 +22,8 @@ class FirebaseCoursesRepository(private val firestore: FirebaseFirestore): Cours
                     Course(code, name, professor, slots, totalClasses)
                 }?.associateBy { it.code } ?: emptyMap()
             ))
+        }.addOnFailureListener {
+            continuation.resume(ApiResult.Error(it))
         }
     }
 }

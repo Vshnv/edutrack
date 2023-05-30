@@ -7,6 +7,10 @@ import kotlin.coroutines.suspendCoroutine
 
 class FirebaseAssignmentsRepository(private val firestore: FirebaseFirestore): AssignmentsRepository {
     override suspend fun fetchAssignments(courseCodes: List<String>): ApiResult<List<Assignment>> = suspendCoroutine{ continuation ->
+        if (courseCodes.isEmpty()) {
+            continuation.resume(ApiResult.Success(emptyList()))
+            return@suspendCoroutine
+        }
         firestore.collection("assignments").whereIn("course", courseCodes).get().addOnCompleteListener { value ->
             val result = value.result
             val mappedCourses = result?.documents?.map {
@@ -18,8 +22,6 @@ class FirebaseAssignmentsRepository(private val firestore: FirebaseFirestore): A
                 )
             }
             continuation.resume(ApiResult.Success(mappedCourses ?: emptyList()))
-
-
         }.addOnFailureListener {
             continuation.resume(ApiResult.Error(it))
         }
