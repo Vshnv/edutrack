@@ -19,6 +19,7 @@ import org.saintgits.edutrack.utils.dayAsText
 import java.text.SimpleDateFormat
 import java.util.*
 
+/*
 val DATE_FORMAT = SimpleDateFormat.getDateInstance()
 @Composable
 fun TimeTableScreen() {
@@ -129,6 +130,15 @@ fun TimeTable(modifier: Modifier = Modifier, schedule: Map<String, Course>, star
             }
         }
     }
+    listOf(
+        "09:00AM - 09:50AM",
+        "09:50AM - 10:40AM",
+        "10:50AM - 11:40AM",
+        "11:40AM - 12:30PM",
+        "01:30PM - 02:20PM",
+        "02:30PM - 03:10PM",
+         "03:20PM - 04:10PM"
+         )
 
     val horizontalScrollState = rememberScrollState()
     Column {
@@ -227,3 +237,4 @@ fun TimeTableCell(color: Color, content: @Composable ColumnScope.() -> Unit) {
     }
 }
 
+*/

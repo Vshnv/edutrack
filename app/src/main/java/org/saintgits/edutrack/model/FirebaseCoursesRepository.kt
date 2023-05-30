@@ -6,7 +6,11 @@ import kotlin.coroutines.suspendCoroutine
 
 class FirebaseCoursesRepository(private val firestore: FirebaseFirestore): CoursesRepository {
     override suspend fun fetchCourse(courseIds: List<String>): ApiResult<Map<String, Course>> = suspendCoroutine { continuation ->
-        firestore.collection("courses").whereArrayContainsAny("code", courseIds).addSnapshotListener { value, error ->
+        if (courseIds.isEmpty()) {
+            continuation.resume(ApiResult.Success(emptyMap()))
+            return@suspendCoroutine
+        }
+        firestore.collection("courses").whereIn("code", courseIds).addSnapshotListener { value, error ->
             if (error != null) {
                 continuation.resume(ApiResult.Error(error))
                 return@addSnapshotListener

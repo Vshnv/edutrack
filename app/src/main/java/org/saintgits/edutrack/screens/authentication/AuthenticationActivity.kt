@@ -1,6 +1,8 @@
 package org.saintgits.edutrack.screens.authentication
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.saintgits.edutrack.model.LoginResult
+import org.saintgits.edutrack.screens.dashboard.DashboardActivity
 import org.saintgits.edutrack.ui.theme.EdutrackTheme
 import org.saintgits.edutrack.viewmodel.AuthViewModel
 
@@ -25,7 +28,15 @@ class AuthenticationActivity: ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    LoginScreen(login = { a, b -> authViewModel.login(a, b) })
+                    LoginScreen(login = { a, b ->
+                        val result = authViewModel.login(a, b)
+                        if (result) {
+                            startActivity(Intent(this, DashboardActivity::class.java))
+                        } else {
+                            Toast.makeText(this, "Incorrect email/password", Toast.LENGTH_SHORT).show()
+                        }
+                        return@LoginScreen result
+                    })
                 }
             }
         }

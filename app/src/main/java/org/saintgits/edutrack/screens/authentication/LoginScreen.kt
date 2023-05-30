@@ -89,11 +89,8 @@ fun LoginScreen(login: suspend (username: String, password: String) -> Boolean) 
             onClick = {
                 setLoggingIn(true)
                 coroutineScope.launch {
-                    delay(1500)
+                    login(username, password)
                     setLoggingIn(false)
-                    withContext(Dispatchers.Main) {
-                        context.startActivity(Intent(context, DashboardActivity::class.java))
-                    }
                 }
             }
         ) {

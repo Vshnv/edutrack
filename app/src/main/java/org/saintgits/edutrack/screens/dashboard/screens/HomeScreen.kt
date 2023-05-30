@@ -7,6 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -21,6 +23,9 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldColors
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,17 +37,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import org.saintgits.edutrack.R
+import org.saintgits.edutrack.model.AttendanceRecord
+import org.saintgits.edutrack.model.Course
 import org.saintgits.edutrack.model.Role
 import org.saintgits.edutrack.model.StudentUser
 import org.saintgits.edutrack.model.User
 import org.saintgits.edutrack.screens.dashboard.DashboardScreen
 import org.saintgits.edutrack.ui.theme.EdutrackTheme
+import org.saintgits.edutrack.viewmodel.AttendanceViewModel
+import org.saintgits.edutrack.viewmodel.result.LoadableState
 import java.util.*
 import kotlin.jvm.internal.Intrinsics
+import kotlin.math.roundToInt
 
 @Composable
 fun HomeScreen(user: User) {
+    val attendanceViewModel = viewModel(modelClass = AttendanceViewModel::class.java)
+    val attendanceRecord by attendanceViewModel.attendanceRecord.observeAsState(LoadableState.Loading())
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(modifier = Modifier.height(50.dp))
         Image(
@@ -56,22 +69,39 @@ fun HomeScreen(user: User) {
         Text(text = user.name, fontSize = 40.sp, fontWeight = FontWeight.Light)
         Spacer(modifier = Modifier.height(20.dp))
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            TextField(label = { Text(text = "Name") },value = "Malavika", onValueChange = {}, enabled = false, colors = TextFieldDefaults.textFieldColors(disabledTextColor = Color.Black))
-            TextField(label = { Text(text = "Role") },value = "Student", onValueChange = {}, enabled = false, colors = TextFieldDefaults.textFieldColors(disabledTextColor = Color.Black))
-            TextField(label = { Text(text = "Email") },value = "malavika@gmail.com", onValueChange = {}, enabled = false, colors = TextFieldDefaults.textFieldColors(disabledTextColor = Color.Black))
+            TextField(label = { Text(text = "Name") },value = user.name, onValueChange = {}, enabled = false, colors = TextFieldDefaults.textFieldColors(disabledTextColor = Color.Black))
+            TextField(label = { Text(text = "Role") },value = user.role.name, onValueChange = {}, enabled = false, colors = TextFieldDefaults.textFieldColors(disabledTextColor = Color.Black))
+            TextField(label = { Text(text = "Email") },value = user.email, onValueChange = {}, enabled = false, colors = TextFieldDefaults.textFieldColors(disabledTextColor = Color.Black))
         }
         Spacer(modifier = Modifier.height(5.dp))
         if (user.role == Role.STUDENT) {
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .padding(10.dp, 25.dp, 10.dp, 10.dp)
-                    .clip(
-                        RoundedCornerShape(10.dp)
-                    )
-                    .background(Color.Gray)) {
-                AttendanceCard()
+            when (val attRec = attendanceRecord) {
+                is LoadableState.Error -> {
+                    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                        Text(text = "Failed to load.")
+                        Text(text = attRec.message)
+                    }
+                }
+                is LoadableState.Loading -> {
+                    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+                is LoadableState.Result -> {
+                    LazyColumn(
+                        Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight()
+                            .padding(10.dp, 25.dp, 10.dp, 10.dp)
+                            .clip(
+                                RoundedCornerShape(10.dp)
+                            )
+                            .background(Color.Gray)) {
+                        items(attRec.result.entries.toList()) {
+                            AttendanceCard(it.key to it.value)
+                        }
+                    }
+                }
             }
         }
     }
@@ -84,7 +114,12 @@ fun StudentAttendance() {
 
 
 @Composable
-fun AttendanceCard() {
+fun AttendanceCard(data: Pair<Course, AttendanceRecord>) {
+    val attendancePercent = remember(data) {
+        val attended = data.second.attendance.count { it.value }.toFloat()
+        val totalClassHeld = data.second.attendance.size
+        attended / totalClassHeld
+    }
     Card(
         Modifier
             .fillMaxWidth()
@@ -95,8 +130,8 @@ fun AttendanceCard() {
                 .padding(10.dp)
                 .background(Color.White), verticalAlignment = Alignment.CenterVertically) {
             Column {
-                Text(text = "CSE1002", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                Text(text = "Computer Architecture")
+                Text(text = data.first.code, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Text(text = data.first.name)
                 Spacer(modifier = Modifier.height(30.dp))
                 Button(onClick = { /*TODO*/ }) {
                     Text(text = "View")
@@ -104,8 +139,8 @@ fun AttendanceCard() {
             }
             Spacer(modifier = Modifier.weight(1f))
             Box(modifier = Modifier.wrapContentSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(modifier = Modifier.size(100.dp), progress = 0.75f)
-                Text(text = "75", fontSize = 25.sp)
+                CircularProgressIndicator(modifier = Modifier.size(100.dp), progress = attendancePercent)
+                Text(text = "${(attendancePercent * 100).roundToInt()}", fontSize = 25.sp)
             }
         }
     }

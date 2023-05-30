@@ -11,6 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHost
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -29,20 +31,23 @@ import kotlinx.coroutines.launch
 import org.saintgits.edutrack.model.Role
 import org.saintgits.edutrack.model.User
 import org.saintgits.edutrack.screens.dashboard.screens.HomeScreen
-import org.saintgits.edutrack.screens.dashboard.screens.TimeTableScreen
+import org.saintgits.edutrack.screens.dashboard.screens.StudentTimeTableScreen
 import org.saintgits.edutrack.ui.theme.EdutrackTheme
+import org.saintgits.edutrack.viewmodel.HomeViewModel
+import org.saintgits.edutrack.viewmodel.result.LoadableState
 import java.util.*
 
 class DashboardActivity: ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val homeViewModel = viewModel(modelClass = HomeViewModel::class.java)
             EdutrackTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    DashboardScreen("User", Role.STUDENT)
+                    DashboardScreen()
                 }
             }
         }
@@ -52,7 +57,7 @@ class DashboardActivity: ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun DashboardScreenPreview() {
-    DashboardScreen("User", Role.STUDENT)
+    DashboardScreen()
 }
 
 @Preview(showBackground = true, name = "NavDrawer")
@@ -74,14 +79,21 @@ fun HomePreview() {
 
 
 @Composable
-fun DashboardScreen(username: String, role: Role) {
-    val screens = remember(role) {
-        Screen.values().filter { role in it.roles }
-    }
+fun DashboardScreen() {
+    val homeViewModel = viewModel(modelClass = HomeViewModel::class.java)
+
+
     val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val navController = rememberNavController()
 
+    val userState = homeViewModel.user.observeAsState(initial = LoadableState.Loading())
+    val screens = remember(userState.value) {
+        when (val userValue = userState.value) {
+            is LoadableState.Result -> Screen.values().filter { userValue.result.role in it.roles }
+            else -> emptyList<Screen>()
+        }
+    }
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier.fillMaxSize(),
@@ -101,26 +113,69 @@ fun DashboardScreen(username: String, role: Role) {
             )
         },
         drawerContent = {
-            NavDrawer(name = username, screens = screens, navigate = {
-                if (it !in listOf(Screen.Home.route, Screen.TimeTableStudent.route)) {
-                    return@NavDrawer
+            when (val userLoadableState = userState.value) {
+                is LoadableState.Error -> {
+                    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                        Text(text = "Failed to load.")
+                        Text(text = userLoadableState.message)
+                    }
                 }
-                navController.navigate(it)
-            })
+                is LoadableState.Loading -> {
+                    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+                is LoadableState.Result -> {
+                    NavDrawer(name = userLoadableState.result.name, screens = screens, navigate = {
+                        if (it !in listOf(Screen.Home.route, Screen.TimeTableStudent.route)) {
+                            return@NavDrawer
+                        }
+                        coroutineScope.launch {
+                            scaffoldState.drawerState.close()
+                        }
+                        navController.navigate(it)
+                    })
+                }
+            }
         }
     ) {
        Column(modifier = Modifier.padding(it)) {
            NavHost(navController = navController, startDestination = Screen.Home.route) {
                composable(Screen.Home.route) {
-                   HomeScreen(user = User(
-                       username,
-                       "PersonABC",
-                       Date(),
-                       Role.STUDENT
-                   ))
+                   when (val userLoadableState = userState.value) {
+                       is LoadableState.Error -> {
+                           Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                               Text(text = "Failed to load.")
+                               Text(text = userLoadableState.message)
+                           }
+                       }
+                       is LoadableState.Loading -> {
+                           Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                               CircularProgressIndicator()
+                           }
+                       }
+                       is LoadableState.Result -> {
+                           HomeScreen(user = userLoadableState.result)
+                       }
+                   }
                }
                composable(Screen.TimeTableStudent.route) {
-                   TimeTableScreen()
+                   when (val userLoadableState = userState.value) {
+                       is LoadableState.Error -> {
+                           Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                               Text(text = "Failed to load.")
+                               Text(text = userLoadableState.message)
+                           }
+                       }
+                       is LoadableState.Loading -> {
+                           Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                               CircularProgressIndicator()
+                           }
+                       }
+                       is LoadableState.Result -> {
+                           StudentTimeTableScreen(user = userLoadableState.result)
+                       }
+                   }
                }
            }
        }
